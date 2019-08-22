@@ -129,11 +129,24 @@ quested below "+std::to_string(Emin/GeV)+" GeV or above "+std::to_string(Emax/Ge
            LinInter(logE2,logE_data_range[loge_M2],logE_data_range[loge_M2+1],phiPM,phiPP));
 }
 
-void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
-       std::string filename_dsde_CC = root+"dsde_CC.dat";
-       std::string filename_dsde_NC = root+"dsde_NC.dat";
-       std::string filename_sigma_CC = root+"sigma_CC.dat";
-       std::string filename_sigma_NC = root+"sigma_NC.dat";
+void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root, bool use_isoscalar){
+       std::vector<Target> targets_to_load;
+       if(use_isoscalar)
+        targets_to_load = {isoscalar};
+       else
+        targets_to_load = {proton, neutron};
+
+       std::string filename_sigma_CC;
+       if(use_isoscalar){
+             filename_dsde_CC = root+"dsde_CC.dat";
+             std::string filename_dsde_NC = root+"dsde_NC.dat";
+             std::string filename_sigma_CC = root+"sigma_CC.dat";
+             std::string filename_sigma_NC = root+"sigma_NC.dat";
+       } else {
+             filename_dsde_CC_p = root+"dsde_p_CC.dat";
+             filename_dsde_CC_n = root+"dsde_n_CC.dat";
+
+       }
 
        std::cout << filename_sigma_NC << std::endl;
        // check if files exist for this energies and divisions
@@ -172,14 +185,17 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           s_NC_data.resize(std::vector<size_t>{2,3,data_e_size});
           dsde_CC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
           dsde_NC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
-          for(NeutrinoType neutype : {neutrino,antineutrino}){
-            for(NeutrinoFlavor flavor : {electron,muon,tau}){
-              for(unsigned int e1 = 0; e1 < data_e_size; e1++){
-                s_CC_data[neutype][flavor][e1] = sigma_CC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
-                s_NC_data[neutype][flavor][e1] = sigma_NC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
-                for (unsigned int e2 = 0; e2 < data_e_size; e2++){
-                  dsde_CC_data[neutype][flavor][e1][e2] = dsde_CC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
-                  dsde_NC_data[neutype][flavor][e1][e2] = dsde_NC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+          for(Target target: targets_to_load){
+            for(NeutrinoType neutype : {neutrino,antineutrino}){
+              for(NeutrinoFlavor flavor : {electron,muon,tau}){
+                for(unsigned int e1 = 0; e1 < data_e_size; e1++){
+                  // FIXME
+                  s_CC_data[target][neutype][flavor][e1] = sigma_CC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
+                  s_NC_data[target][neutype][flavor][e1] = sigma_NC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
+                  for (unsigned int e2 = 0; e2 < data_e_size; e2++){
+                    dsde_CC_data[target][neutype][flavor][e1][e2] = dsde_CC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+                    dsde_NC_data[target][neutype][flavor][e1][e2] = dsde_NC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+                  }
                 }
               }
             }

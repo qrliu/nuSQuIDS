@@ -48,9 +48,11 @@ class NeutrinoCrossSections{
     enum NeutrinoType {neutrino = 0, antineutrino = 1};
     /// \brief Interaction current type
     enum Current { CC, NC, GR };
+    /// \brief Interaction current type
+    enum Target { Proton , Neutron , Isoscalar};
     /// \brief Returns the total neutrino cross section
     /// \details Used to interpolate the total cross sections.
-    virtual double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const = 0;
+    virtual double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const = 0;
     /// \brief Returns the Differential cross section with respect to the outgoing lepton energy.
     /// \details The cross section will be returned in cm^2 GeV^-1.
     /// @param E1 Incident lepton energy.
@@ -58,7 +60,7 @@ class NeutrinoCrossSections{
     /// @param flavor Flavor index.
     /// @param neutype Can be either neutrino or antineutrino.
     /// @param current Can be either CC or NC.
-    virtual double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const = 0;
+    virtual double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const = 0;
     /// \brief Returns the double differential cross section with respect to x and y.
     /// \details The cross section will be returned in cm^2 GeV^-1. As this cross sections is not requiered and thus not called by the program
     /// its implementation is optional.
@@ -68,7 +70,7 @@ class NeutrinoCrossSections{
     /// @param flavor Flavor index.
     /// @param neutype Can be either neutrino or antineutrino.
     /// @param current Can be either CC or NC.
-    virtual double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const {
+    virtual double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const {
       throw std::runtime_error("NeutrinoCrossSections::Error::DoubleDifferentialCrossSection is not implemented.");
       return 0;
     }
@@ -80,10 +82,13 @@ class NullCrossSections: public NeutrinoCrossSections {
   public :
     NullCrossSections(){}
     /// \brief Returns the total neutrino cross section
+      /// FIXME
     double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override { return 0;}
     /// \brief Returns the Differential cross section with respect to the outgoing lepton energy.
+      /// FIXME
     double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override { return 0;}
     /// \brief Returns the double differential cross section with respect to x and y.
+      /// FIXME
     double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override { return 0;}
 };
 
@@ -106,20 +111,24 @@ class NeutrinoDISCrossSectionsFromTables : public NeutrinoCrossSections {
 
       /// \brief The neutrino charged current total cross section
       ///
-      ///Indices are neutrino/anti-neutrino, flavor, energy
-      marray<double,3> s_CC_data;
+      ///Indices are target, neutrino/anti-neutrino, flavor, energy
+      /// FIXME
+      marray<double,4> s_CC_data;
       /// \brief The neutrino neutral current total cross section
       ///
-      ///Indices are neutrino/anti-neutrino, flavor, energy
-      marray<double,3> s_NC_data;
+      /// FIXME
+      ///Indices are target, neutrino/anti-neutrino, flavor, energy
+      marray<double,4> s_NC_data;
       /// \brief The neutrino charged current differential cross section.
       ///
-      ///Indices are neutrino/anti-neutrino, flavor, incident energy, out-going energy
-      marray<double,4> dsde_CC_data;
+      /// FIXME
+      ///Indices are target, neutrino/anti-neutrino, flavor, incident energy, out-going energy
+      marray<double,5> target, dsde_CC_data;
       /// \brief The neutrino neutral current differential cross section.
       ///
-      ///Indices are neutrino/anti-neutrino, flavor, incident energy, out-going energy
-      marray<double,4> dsde_NC_data;
+      /// FIXME
+      ///Indices are target, neutrino/anti-neutrino, flavor, incident energy, out-going energy
+      marray<double,5> dsde_NC_data;
       /// \brief Stores the array of the log energies of the data tables.
       std::vector<double> logE_data_range;
 
