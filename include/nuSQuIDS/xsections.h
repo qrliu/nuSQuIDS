@@ -83,7 +83,7 @@ class NullCrossSections: public NeutrinoCrossSections {
     NullCrossSections(){}
     /// \brief Returns the total neutrino cross section
       /// FIXME
-    double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override { return 0;}
+    double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override { return 0;}
     /// \brief Returns the Differential cross section with respect to the outgoing lepton energy.
       /// FIXME
     double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override { return 0;}
