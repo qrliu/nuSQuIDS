@@ -108,7 +108,20 @@ class NeutrinoDISCrossSectionsFromTables : public NeutrinoCrossSections {
       unsigned int div;
       /// \brief GeV in eV
       const double GeV = 1.0e9;
+      marray<double,2> p_dsde_CC_raw_data;
+      marray<double,2> p_dsde_NC_raw_data;
+      marray<double,2> n_dsde_CC_raw_data;
+      marray<double,2> n_dsde_NC_raw_data;
+      marray<double,2> p_sigma_CC_raw_data;
+      marray<double,2> p_sigma_NC_raw_data;
+      marray<double,2> n_sigma_CC_raw_data;
+      marray<double,2> n_sigma_NC_raw_data;
+      marray<double,2> niso_dsde_CC_raw_data;
+      marray<double,2> niso_dsde_NC_raw_data;
+      marray<double,2> niso_sigma_CC_raw_data;
+      marray<double,2> niso_sigma_NC_raw_data;
 
+      bool use_isoscalar = false;
       /// \brief The neutrino charged current total cross section
       ///
       ///Indices are target, neutrino/anti-neutrino, flavor, energy
@@ -147,7 +160,7 @@ class NeutrinoDISCrossSectionsFromTables : public NeutrinoCrossSections {
       }
       /// \brief Reads cross section data from a collection of text files
       /// \param root the base file path
-      void ReadText(std::string root, bool use_isoscalar);
+      void ReadText(std::string root);
     public :
       virtual ~NeutrinoDISCrossSectionsFromTables();
       /// \brief Default construct with built-in tables
