@@ -45,7 +45,7 @@ double NeutrinoDISCrossSectionsFromTables::LinInter(double x,double xM, double x
 }
 
 double NeutrinoDISCrossSectionsFromTables::TotalCrossSection(double Enu, NeutrinoFlavor flavor,
-                           NeutrinoType neutype, Current current) const{
+                           NeutrinoType neutype, Current current, Target target) const{
   // we assume that sterile neutrinos are truly sterile
   if (not (flavor == electron or flavor == muon or flavor == tau))
     return 0.0;
@@ -59,7 +59,7 @@ quested below "+std::to_string(Emin/GeV)+" GeV or above "+std::to_string(Emax/Ge
     return std::numeric_limits<double>::min();
   } else if (Enu < Emin) {
     // use approximate linear scaling below Emin GeV which is a good approximation for DIS up to 10 GeV
-    return TotalCrossSection(Emin, flavor, neutype, current)*(Enu/Emin);
+    return TotalCrossSection(Emin, flavor, neutype, current, target)*(Enu/Emin);
   }
 
   // convert to GeV
@@ -70,11 +70,11 @@ quested below "+std::to_string(Emin/GeV)+" GeV or above "+std::to_string(Emax/Ge
   size_t idx = static_cast<size_t>((logE-logE_data_range[0])/dlogE);
   if(idx==div)
     idx--;
-  const marray<double,3>& sigma=(current==CC ? s_CC_data : s_NC_data);
-  return(LinInter(logE,logE_data_range[idx],logE_data_range[idx+1],sigma[neutype][flavor][idx],sigma[neutype][flavor][idx+1]));
+  const marray<double,4>& sigma=(current==CC ? s_CC_data : s_NC_data);
+  return(LinInter(logE,logE_data_range[idx],logE_data_range[idx+1],sigma[target][neutype][flavor][idx],sigma[target][neutype][flavor][idx+1]));
 }
 
-double NeutrinoDISCrossSectionsFromTables::SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const{
+double NeutrinoDISCrossSectionsFromTables::SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const{
   // we assume that sterile neutrinos are trully sterile
   if (not (flavor == electron or flavor == muon or flavor == tau))
     return 0.0;
@@ -102,25 +102,25 @@ quested below "+std::to_string(Emin/GeV)+" GeV or above "+std::to_string(Emax/Ge
   //std::cout << E1 << " " << E2 << " " << loge_M1 << " " << loge_M2 << " " << div << std::endl;
   double phiMM,phiMP,phiPM,phiPP;
   if (current == CC){
-    phiMM = dsde_CC_data[neutype][flavor][loge_M1][loge_M2];
-    phiMP = dsde_CC_data[neutype][flavor][loge_M1][loge_M2+1];
+    phiMM = dsde_CC_data[target][neutype][flavor][loge_M1][loge_M2];
+    phiMP = dsde_CC_data[target][neutype][flavor][loge_M1][loge_M2+1];
     if ( loge_M1 == div-1 ){
       // we are at the boundary, cannot bilinearly interpolate
       return LinInter(logE2,logE_data_range[loge_M2],logE_data_range[loge_M2+1],
           phiMM,phiMP);
     }
-    phiPM = dsde_CC_data[neutype][flavor][loge_M1+1][loge_M2];
-    phiPP = dsde_CC_data[neutype][flavor][loge_M1+1][loge_M2+1];
+    phiPM = dsde_CC_data[target][neutype][flavor][loge_M1+1][loge_M2];
+    phiPP = dsde_CC_data[target][neutype][flavor][loge_M1+1][loge_M2+1];
   } else if (current == NC){
-    phiMM = dsde_NC_data[neutype][flavor][loge_M1][loge_M2];
-    phiMP = dsde_NC_data[neutype][flavor][loge_M1][loge_M2+1];
+    phiMM = dsde_NC_data[target][neutype][flavor][loge_M1][loge_M2];
+    phiMP = dsde_NC_data[target][neutype][flavor][loge_M1][loge_M2+1];
     if ( loge_M1 == div-1 ){
       // we are at the boundary, cannot bilinearly interpolate
       return LinInter(logE2,logE_data_range[loge_M2],logE_data_range[loge_M2+1],
           phiMM,phiMP);
     }
-    phiPM = dsde_NC_data[neutype][flavor][loge_M1+1][loge_M2];
-    phiPP = dsde_NC_data[neutype][flavor][loge_M1+1][loge_M2+1];
+    phiPM = dsde_NC_data[target][neutype][flavor][loge_M1+1][loge_M2];
+    phiPP = dsde_NC_data[target][neutype][flavor][loge_M1+1][loge_M2+1];
   } else
     throw std::runtime_error("nuSQUIDS::XSECTIONS::ERROR::Current type unkwown.");
 
@@ -132,9 +132,9 @@ quested below "+std::to_string(Emin/GeV)+" GeV or above "+std::to_string(Emax/Ge
 void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root, bool use_isoscalar){
        std::vector<Target> targets_to_load;
        if(use_isoscalar)
-        targets_to_load = {isoscalar};
+        targets_to_load = {Isoscalar};
        else
-        targets_to_load = {proton, neutron};
+        targets_to_load = {Proton, Neutron};
 
        std::string filename_sigma_CC;
        if(use_isoscalar){
@@ -185,7 +185,7 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root, bool use_iso
           s_NC_data.resize(std::vector<size_t>{2,3,data_e_size});
           dsde_CC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
           dsde_NC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
-          for(Target target: targets_to_load){
+          for(Target target : targets_to_load){
             for(NeutrinoType neutype : {neutrino,antineutrino}){
               for(NeutrinoFlavor flavor : {electron,muon,tau}){
                 for(unsigned int e1 = 0; e1 < data_e_size; e1++){
@@ -262,7 +262,7 @@ void NeutrinoDISCrossSectionsFromTables::WriteText(std::string basePath) const{
   std::string filename_dsde_CC = basePath+"dsde_CC.dat";
   std::string filename_dsde_NC = basePath+"dsde_NC.dat";
   
-  auto writeTotal=[](const std::string& path, const marray<double,3>& data,
+  auto writeTotal=[](const std::string& path, const marray<double,4>& data,
                      const std::vector<double>& logEnergies, double GeV){
     std::ofstream out(path);
     for(size_t ie=0; ie<logEnergies.size(); ie++){
@@ -277,7 +277,7 @@ void NeutrinoDISCrossSectionsFromTables::WriteText(std::string basePath) const{
   writeTotal(filename_sigma_CC,s_CC_data,logE_data_range,GeV);
   writeTotal(filename_sigma_NC,s_NC_data,logE_data_range,GeV);
   
-  auto writeDifferential=[](const std::string& path, const marray<double,4>& data,
+  auto writeDifferential=[](const std::string& path, const marray<double,5>& data,
                             const std::vector<double>& logEnergies, double GeV){
     std::ofstream out(path);
     for(size_t ie1=0; ie1<logEnergies.size(); ie1++){
@@ -306,7 +306,7 @@ GlashowResonanceCrossSection::GlashowResonanceCrossSection(){
 GlashowResonanceCrossSection::~GlashowResonanceCrossSection(){}
   
 double GlashowResonanceCrossSection::TotalCrossSection(double Enu, NeutrinoFlavor flavor,
- NeutrinoType neutype, Current current) const{
+ NeutrinoType neutype, Current current, Target target) const{
   // only treat the glashow resonance
   if (not (flavor == electron and neutype == antineutrino and current == GR))
     return 0;
@@ -319,7 +319,7 @@ double GlashowResonanceCrossSection::TotalCrossSection(double Enu, NeutrinoFlavo
    / (pow(1. - 2*m*Enu/(M_W*M_W), 2) + pow(W_total/M_W, 2)) / B_Muon / 3;
 }
   
-double GlashowResonanceCrossSection::SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const{
+double GlashowResonanceCrossSection::SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const{
   // only treat the glashow resonance
   if (not (flavor == electron and neutype == antineutrino and current == GR))
     return 0;
@@ -328,10 +328,10 @@ double GlashowResonanceCrossSection::SingleDifferentialCrossSection(double E1, d
   // differential cross section for leptonic final states only
   // NB: assumes that the branching fractions are identical for all 3 families
   double xl = E2/E1;
-  return B_Muon*3*TotalCrossSection(E1, flavor, neutype, current)*(xl*xl)/E1*constants.GeV;
+  return B_Muon*3*TotalCrossSection(E1, flavor, neutype, current, target)*(xl*xl)/E1*constants.GeV;
 }
   
-double GlashowResonanceCrossSection::DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const{
+double GlashowResonanceCrossSection::DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const{
   return 0;
 }
   

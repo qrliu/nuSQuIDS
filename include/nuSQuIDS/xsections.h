@@ -86,10 +86,10 @@ class NullCrossSections: public NeutrinoCrossSections {
     double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override { return 0;}
     /// \brief Returns the Differential cross section with respect to the outgoing lepton energy.
       /// FIXME
-    double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override { return 0;}
+    double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override { return 0;}
     /// \brief Returns the double differential cross section with respect to x and y.
       /// FIXME
-    double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override { return 0;}
+    double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override { return 0;}
 };
 
 /// \class NeutrinoDISCrossSectionsFromTables
@@ -141,13 +141,13 @@ class NeutrinoDISCrossSectionsFromTables : public NeutrinoCrossSections {
       /// \param yP tablated ordinate value at xP
       double LinInter(double x,double xM,double xP,double yM,double yP) const;
       /// \brief Null Double Differential Cross section
-      virtual double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override
+      virtual double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override
       {
         return 0.;
       }
       /// \brief Reads cross section data from a collection of text files
       /// \param root the base file path
-      void ReadText(std::string root);
+      void ReadText(std::string root, bool use_isoscalar);
     public :
       virtual ~NeutrinoDISCrossSectionsFromTables();
       /// \brief Default construct with built-in tables
@@ -210,7 +210,7 @@ class NeutrinoDISCrossSectionsFromTables : public NeutrinoCrossSections {
 
       /// \brief Returns the total neutrino cross section
       /// \details Used to interpolate the total cross sections.
-      double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override;
+      double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override;
       /// \brief Returns the Differential cross section with respect to the outgoing lepton energy.
       /// \param E1 Incident lepton energy.
       /// \param E2 Outgoing lepton energy.
@@ -218,7 +218,7 @@ class NeutrinoDISCrossSectionsFromTables : public NeutrinoCrossSections {
       /// \param neutype Can be either neutrino or antineutrino.
       /// \param current Can be either CC or NC.
       /// \return The cross section in cm^2 GeV^-1.
-      double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override;
+      double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override;
       /// \brief Returns the number of energy nodes.
       unsigned int GetNumE() const {return div;}
       /// \brief Returns the minimum energy in [eV]
@@ -245,7 +245,7 @@ public:
   GlashowResonanceCrossSection();
 
   /// \brief Returns the total neutrino cross section
-  double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override;
+  double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override;
   /// \brief Returns the Differential cross section with respect to the outgoing lepton energy.
   /// \param E1 Incident lepton energy.
   /// \param E2 Outgoing lepton energy.
@@ -253,10 +253,10 @@ public:
   /// \param neutype Must be antineutrino.
   /// \param current Must be GR.
   /// \return The cross section in cm^2 GeV^-1.
-  double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override;
+  double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override;
   
   /// \warning Not implemented; should not be used.
-  double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override;
+  double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override;
   
   /// \brief Returns the fraction of final states with a lepton of the specified flavor
   /// \details For muon flavor, this is the ratio of the integrated single-differential cross-section to the total cross-section
