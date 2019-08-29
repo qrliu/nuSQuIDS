@@ -209,6 +209,7 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
        if(
           use_isoscalar
          ) {
+         registered_targets_ = {Isoscalar};
 /*          // read data tables
           marray<double,2> niso_dsde_CC_raw_data = quickread(filename_dsde_CC);
           marray<double,2> dsde_NC_raw_data = quickread(filename_dsde_NC);
@@ -254,7 +255,7 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           
   } else {
 //    throw std::runtime_error("nuSQUIDS::XSECTIONS::ERROR::Cross section files not found.");
-
+         registered_targets_ = {Proton, Neutron};
           unsigned int data_e_size = 0;
           if( p_sigma_CC_raw_data.extent(0) == p_sigma_NC_raw_data.extent(0) and
               p_sigma_CC_raw_data.extent(0) == p_sigma_NC_raw_data.extent(0) and 
@@ -286,12 +287,21 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
             for(NeutrinoType neutype : {neutrino,antineutrino}){
               for(NeutrinoFlavor flavor : {electron,muon,tau}){
                 for(unsigned int e1 = 0; e1 < data_e_size; e1++){
-                  // FIXME
-                s_CC_data[target][neutype][flavor][e1] = niso_sigma_CC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
-                  s_NC_data[target][neutype][flavor][e1] = niso_sigma_NC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
+                  if(target == Proton){
+                    s_CC_data[target][neutype][flavor][e1] = p_sigma_CC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
+                    s_NC_data[target][neutype][flavor][e1] = p_sigma_NC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
+                  } else {
+                    s_CC_data[target][neutype][flavor][e1] = n_sigma_CC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
+                    s_NC_data[target][neutype][flavor][e1] = n_sigma_NC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
+                  }
                   for (unsigned int e2 = 0; e2 < data_e_size; e2++){
-                    dsde_CC_data[target][neutype][flavor][e1][e2] = niso_dsde_CC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
-                    dsde_NC_data[target][neutype][flavor][e1][e2] = niso_dsde_NC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+                    if(target == Proton){
+                      dsde_CC_data[target][neutype][flavor][e1][e2] = p_dsde_CC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+                      dsde_NC_data[target][neutype][flavor][e1][e2] = p_dsde_NC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+                    } else {
+                      dsde_CC_data[target][neutype][flavor][e1][e2] = n_dsde_CC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+                      dsde_NC_data[target][neutype][flavor][e1][e2] = n_dsde_NC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+                    }
                   }
                 }
               }
@@ -401,6 +411,7 @@ GlashowResonanceCrossSection::GlashowResonanceCrossSection(){
   fermi_scale = pow(constants.GF/constants.cm, 2)*constants.electron_mass/constants.pi;
   M_W = 80.385*constants.GeV;
   W_total = 2.085*constants.GeV;
+  registered_targets_ = {Electron};
 }
   
 GlashowResonanceCrossSection::~GlashowResonanceCrossSection(){}
@@ -410,6 +421,8 @@ double GlashowResonanceCrossSection::TotalCrossSection(double Enu, NeutrinoFlavo
   // only treat the glashow resonance
   if (not (flavor == electron and neutype == antineutrino and current == GR))
     return 0;
+  if ( target != Electron )
+    return 0.;
   // calculate total cross-section for nuebar + e- -> numubar + mu-, then divide
   // by the W- -> numubar + mu- branching fraction to get total cross-section
   // see e.g. arxiv:1108.3163v2, Eq. 2.1
@@ -421,6 +434,8 @@ double GlashowResonanceCrossSection::TotalCrossSection(double Enu, NeutrinoFlavo
   
 double GlashowResonanceCrossSection::SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const{
   // only treat the glashow resonance
+  if (target != Electron)
+    return 0.;
   if (not (flavor == electron and neutype == antineutrino and current == GR))
     return 0;
   if (E2 > E1)

@@ -143,7 +143,7 @@ protected:
         /// is initialized when InitializeInteractions() is called. The first dimension
         /// is number of neutrino types (neutrino/antineutrino/both), the second the neutrino flavor,
         /// and the last two the initial and final energy node respectively.
-        marray<double,4,aligned_allocator<double>> dNdE_CC;
+        marray<double,5,aligned_allocator<double>> dNdE_CC;
         /// \brief Neutrino neutral current differential cross section with respect to
         /// the outgoing lepton energy.
         ///
@@ -151,7 +151,7 @@ protected:
         /// is initialized when InitializeInteractions() is called. The first dimension
         /// is number of neutrino types (neutrino/antineutrino/both), the second the neutrino flavor,
         /// and the last two the initial and final energy node respectively.
-        marray<double,4,aligned_allocator<double>> dNdE_NC;
+        marray<double,5,aligned_allocator<double>> dNdE_NC;
         /// \brief Glashow resonance differential cross section (electron antineutrino only
         /// \details Dimensions are initial and final energy node
         marray<double,2,aligned_allocator<double>> dNdE_GR;
@@ -159,12 +159,12 @@ protected:
         /// \details The first dimension corresponds to the neutrino type, the second to the flavor, and
         /// the final one to the energy node. Its contents are in natural units, i.e. eV^-2. It is
         /// initialized by InitializeInteractions() .
-        marray<double,3,aligned_allocator<double>> sigma_CC;
+        marray<double,4,aligned_allocator<double>> sigma_CC;
         /// \brief Array that contains the neutrino neutral current cross section.
         /// \details The first dimension corresponds to the neutrino type, the second to the flavor, and
         /// the final one to the energy node. Its contents are in natural units, i.e. eV^-2. It is
         /// initialized by InitializeInteractions() .
-        marray<double,3,aligned_allocator<double>> sigma_NC;
+        marray<double,4,aligned_allocator<double>> sigma_NC;
         /// \brief Glashow resonance cross section (electron antineutrino only)
         /// \details 1 entry per energy node, in natural units
         marray<double,1,aligned_allocator<double>> sigma_GR;
@@ -470,6 +470,8 @@ protected:
     double time_offset;
     /// \brief Force flavor projections to be positive.
     void PositivizeFlavors();
+    /// \brief Number of DIS targers
+    unsigned ntargets;
   protected:
     /// \brief Initializes flavor and mass projectors
     /// \warning Antineutrinos are handle by means of the AntineutrinoCPFix() function

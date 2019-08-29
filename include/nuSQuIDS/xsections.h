@@ -49,7 +49,7 @@ class NeutrinoCrossSections{
     /// \brief Interaction current type
     enum Current { CC, NC, GR };
     /// \brief Interaction current type
-    enum Target { Proton , Neutron , Isoscalar};
+    enum Target { Proton , Neutron , Isoscalar, Electron};
     /// \brief Returns the total neutrino cross section
     /// \details Used to interpolate the total cross sections.
     virtual double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const = 0;
@@ -73,6 +73,12 @@ class NeutrinoCrossSections{
     virtual double DoubleDifferentialCrossSection(double E, double x, double y, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const {
       throw std::runtime_error("NeutrinoCrossSections::Error::DoubleDifferentialCrossSection is not implemented.");
       return 0;
+    }
+  protected:
+    std::vector<Target> registered_targets_;
+  public:
+    virtual std::vector<Target> ListAvailableTargets() const {
+      return registered_targets_;
     }
 };
 

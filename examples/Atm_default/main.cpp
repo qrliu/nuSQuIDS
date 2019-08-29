@@ -129,6 +129,8 @@ int main()
   std::cout << "Begin: Evolution" << std::endl;
   nus_atm.EvolveState();
   std::cout << "End: Evolution" << std::endl;
+  
+  nus_atm.WriteStateHDF5("file.hdf5");
 
   //We can save the current state in HDF5 format for future use.
   //nus_atm.WriteStateHDF5("./atmospheric_example_numneu_"+std::to_string(numneu)+".hdf5");
