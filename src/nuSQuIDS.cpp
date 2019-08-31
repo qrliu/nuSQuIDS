@@ -495,8 +495,11 @@ void nuSQUIDS::UpdateInteractions(){
     int_state.invlen_CC.resize(std::vector<size_t>{nrhos,numneu,rounded_ne});
     int_state.invlen_GR.resize(std::vector<size_t>{rounded_ne});
     int_state.invlen_INT.resize(std::vector<size_t>{nrhos,numneu,rounded_ne});
+    // interaction members buffers
+    int_state.dNdE_NC.resize(std::vector<size_t>{nrhos,numneu,ne,rounded_ne});
+    int_state.dNdE_CC.resize(std::vector<size_t>{nrhos,numneu,ne,rounded_ne});
   }
-  
+
     double num_nuc = GetNucleonNumber();
     // in neutral mediums the proton and electron fractions are the same
     double proton_fraction = current_ye;
@@ -509,9 +512,17 @@ void nuSQUIDS::UpdateInteractions(){
             } else { // proton and neutron separate cross sections are available
               int_state.invlen_NC[rho][flv][e1] = (proton_fraction*int_struct->sigma_NC[0][rho][flv][e1] + (1.-proton_fraction)*int_struct->sigma_NC[1][rho][flv][e1])*num_nuc;
               int_state.invlen_CC[rho][flv][e1] = (proton_fraction*int_struct->sigma_CC[0][rho][flv][e1] + (1.-proton_fraction)*int_struct->sigma_CC[1][rho][flv][e1])*num_nuc;
+             }
+            int_state.invlen_INT[rho][flv][e1] = int_state.invlen_NC[rho][flv][e1] + int_state.invlen_CC[rho][flv][e1];
+            for(unsigned int e2 = 0; e2 < ne; e2++){
+              if(ntargets == 1){ // iso-scalar case
+                int_state.dNdE_CC[rho][flv][e1][e2] = int_struct->dNdE_NC[0][rho][flv][e1][e2];
+                int_state.dNdE_NC[rho][flv][e1][e2] = int_struct->dNdE_NC[0][rho][flv][e1][e2];
+              } else { // proton and neutron separate cross sections are available
+                int_state.dNdE_CC[rho][flv][e1][e2] = proton_fraction*int_struct->dNdE_CC[0][rho][flv][e1][e2] + (1.-proton_fraction)*int_struct->dNdE_CC[1][rho][flv][e1][e2];
+                int_state.dNdE_NC[rho][flv][e1][e2] = proton_fraction*int_struct->dNdE_NC[0][rho][flv][e1][e2] + (1.-proton_fraction)*int_struct->dNdE_NC[1][rho][flv][e1][e2];
+              }
             }
-              int_state.invlen_INT[rho][flv][e1] = int_state.invlen_NC[rho][flv][e1] + int_state.invlen_CC[rho][flv][e1];
-            //std::cout << rho << ' ' << flv << ' ' << e1 << ' ' << int_state.invlen_NC[rho][flv][e1]*params.meter << '\n';
           }
       }
     }
@@ -545,7 +556,7 @@ void nuSQUIDS::UpdateInteractions(){
     buf_type* buf_name=(buf_name ## _vec).data(); \
     SQUIDS_POINTER_IS_ALIGNED(buf_name,preferred_alignment*sizeof(buf_type)) \
   // ^ Note lack of trailing semicolon
-  
+
   //Without oscillations, the entries in evol_b1_proj do not depend on energy.
   //We can exploit this to precalculate the information needed by InteractionsRho
   //performing operations on SU_vectors a number of times proportional to the number
@@ -556,7 +567,7 @@ void nuSQUIDS::UpdateInteractions(){
 
     //first initialize to zero
     memset(interaction_cache_store.get(),0,interaction_cache_store_size*sizeof(double));
-    
+
     // NC interactions
     for(unsigned int targets= 0; targets< ntargets; ntargets++){
       for(unsigned int rho = 0; rho < nrhos; rho++){
@@ -572,7 +583,7 @@ void nuSQUIDS::UpdateInteractions(){
             double flux_a_e2=projector*estate[e2].rho[rho];
             //premultiply factors which do not depend on the lower energy e1
             flux_a_e2*=int_state.invlen_NC[rho][alpha_active][e2]*delE[e2-1];
-            double* dNdE_ptr=&int_struct->dNdE_NC[ntargets][rho][alpha_active][e2][0];
+            double* dNdE_ptr=&int_state.dNdE_NC[rho][alpha_active][e2][0];
             SQUIDS_POINTER_IS_ALIGNED(dNdE_ptr,preferred_alignment*sizeof(double));
             for(unsigned int e1=0; e1<e2; e1++, dNdE_ptr++)
               factors[e1]+=flux_a_e2*(*dNdE_ptr);
@@ -603,9 +614,8 @@ void nuSQUIDS::UpdateInteractions(){
         double invlen_CC_tau_bar = int_state.invlen_CC[1][tau_flavor][en];
         double nu_tau_flux_invlen_CC     =     nu_tau_flux*    invlen_CC_tau*dEn;
         double nu_tau_bar_flux_invlen_CC = nu_tau_bar_flux*invlen_CC_tau_bar*dEn;
-        // FIX ME -- tau regeneration optimization broken
-        double* dNdE_CC_tau     = &int_struct->dNdE_CC[0][0][tau_flavor][en][0];
-        double* dNdE_CC_tau_bar = &int_struct->dNdE_CC[0][1][tau_flavor][en][0];
+        double* dNdE_CC_tau     = &int_state.dNdE_CC[0][tau_flavor][en][0];
+        double* dNdE_CC_tau_bar = &int_state.dNdE_CC[1][tau_flavor][en][0];
         SQUIDS_POINTER_IS_ALIGNED(dNdE_CC_tau    ,preferred_alignment*sizeof(double));
         SQUIDS_POINTER_IS_ALIGNED(dNdE_CC_tau_bar,preferred_alignment*sizeof(double));
         for(unsigned int et=1; et<en; et++){ // loop over intermediate tau energies
@@ -731,14 +741,14 @@ void nuSQUIDS::UpdateInteractions(){
           //premultiply factors which do not depend on the lower energy e1
           flux_a_e2*=int_state.invlen_NC[rho][alpha_active][e2]*delE[e2-1];
           // FIX ME this optimization is broken
-          double* dNdE_ptr=&int_struct->dNdE_NC[0][rho][alpha_active][e2][0];
+          double* dNdE_ptr=&int_state.dNdE_NC[rho][alpha_active][e2][0];
           SQUIDS_POINTER_IS_ALIGNED(dNdE_ptr,preferred_alignment*sizeof(double));
           for(unsigned int e1=0; e1<e2; e1++, dNdE_ptr++)
             nc_factors[rho][alpha_active][e1]+=flux_a_e2*(*dNdE_ptr);
         }
       }
     }
-    
+
     if(tauregeneration){
       assert(numneu >= 3);
       const unsigned int tau_flavor = 2;
@@ -757,8 +767,8 @@ void nuSQUIDS::UpdateInteractions(){
         double nu_tau_flux_invlen_CC     =     nu_tau_flux*    invlen_CC_tau*dEn;
         double nu_tau_bar_flux_invlen_CC = nu_tau_bar_flux*invlen_CC_tau_bar*dEn;
         // FIX ME this optimization is broken
-        double* dNdE_CC_tau     = &int_struct->dNdE_CC[0][0][tau_flavor][en][0];
-        double* dNdE_CC_tau_bar = &int_struct->dNdE_CC[0][1][tau_flavor][en][0];
+        double* dNdE_CC_tau     = &int_state.dNdE_CC[0][tau_flavor][en][0];
+        double* dNdE_CC_tau_bar = &int_state.dNdE_CC[1][tau_flavor][en][0];
         SQUIDS_POINTER_IS_ALIGNED(dNdE_CC_tau    ,preferred_alignment*sizeof(double));
         SQUIDS_POINTER_IS_ALIGNED(dNdE_CC_tau_bar,preferred_alignment*sizeof(double));
         for(unsigned int et=1; et<en; et++){ // loop over intermediate tau energies
@@ -767,9 +777,9 @@ void nuSQUIDS::UpdateInteractions(){
           tau_bar_decay_fluxes[et]+=nu_tau_bar_flux_invlen_CC*dNdE_CC_tau_bar[et]*dEt;
         }
       }
-      
+
       //then accumulate the contributions back to the neutrino fluxes from the taus decaying
-      
+
       //zero out the arrays
       std::fill(tau_hadlep_decays.begin(),tau_hadlep_decays.end(),0.);
       std::fill(tau_lep_decays.begin(),tau_lep_decays.end(),0.);
@@ -796,13 +806,13 @@ void nuSQUIDS::UpdateInteractions(){
           tau_lep_decays   [1][e1] +=     tau_decay_flux_et*tau_lep_e1;
         }
       }
-      
+
     }
-    
+
     if(iglashow && (NT == both or NT == antineutrino)){
       std::fill(gr_factors.begin(),gr_factors.end(),0.);
       unsigned int rho=(NT == both) ? 1 : 0;
-      
+
       for(unsigned int e2=1; e2<ne; e2++){
         double flux=evol_b1_proj[rho][0][e2]*estate[e2].rho[rho];
         double flux_invlen_en=flux*int_state.invlen_GR[e2]*delE[e2-1];
@@ -812,9 +822,9 @@ void nuSQUIDS::UpdateInteractions(){
           gr_factors[e1] += flux_invlen_en*dNdE_GR_ptr[e1];
       }
     }
-    
+
   }
-  
+
 //  if(debug)
 //    std::cout << "============ END UpdateInteractions ============" << std::endl;
   #undef ALIGNED_LOCAL_BUFFER
@@ -880,6 +890,7 @@ void nuSQUIDS::GetCrossSections(){
     // available targets
     std::vector<NeutrinoCrossSections::Target> available_targets = ncs->ListAvailableTargets();
     std::map<unsigned int, NeutrinoCrossSections::Target> target_xs_dict;
+    assert(ntargets == available_targets.size());
     if(ntargets == 1) // assume its iso-scalar
       target_xs_dict = (std::map<unsigned int,NeutrinoCrossSections::Target>){{0,NeutrinoCrossSections::Isoscalar}};
     else // assume proton and neutron are provided

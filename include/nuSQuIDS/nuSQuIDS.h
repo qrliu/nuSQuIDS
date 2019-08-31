@@ -294,23 +294,29 @@ protected:
     /// UpdateInteractions() is called. Numerically it is just nuSQUIDS::invlen_NC and nuSQUIDS::invlen_CC
     /// added together.
     marray<double,3,aligned_allocator<double>> invlen_INT;
-    
+
+    marray<double,4,aligned_allocator<double>> dNdE_NC;
+    marray<double,4,aligned_allocator<double>> dNdE_CC;
     /// \brief Default constructor
     InteractionState():
     invlen_CC(aligned_allocator<double>(log2(preferred_alignment*sizeof(double)))),
     invlen_NC(aligned_allocator<double>(log2(preferred_alignment*sizeof(double)))),
     invlen_GR(aligned_allocator<double>(log2(preferred_alignment*sizeof(double)))),
-    invlen_INT(aligned_allocator<double>(log2(preferred_alignment*sizeof(double))))
+    invlen_INT(aligned_allocator<double>(log2(preferred_alignment*sizeof(double)))),
+    dNdE_CC(aligned_allocator<double>(log2(preferred_alignment*sizeof(double)))),
+    dNdE_NC(aligned_allocator<double>(log2(preferred_alignment*sizeof(double))))
     {}
     /// \brief Copy constructor
     InteractionState(InteractionState& other):
     invlen_CC(other.invlen_CC),invlen_NC(other.invlen_NC),
-    invlen_GR(other.invlen_GR),invlen_INT(other.invlen_INT)
+    invlen_GR(other.invlen_GR),invlen_INT(other.invlen_INT),
+    dNdE_CC(other.dNdE_CC), dNdE_NC(other.dNdE_NC)
     {}
     /// \brief Move constructor
     InteractionState(InteractionState&& other):
     invlen_CC(std::move(other.invlen_CC)),invlen_NC(std::move(other.invlen_NC)),
-    invlen_GR(std::move(other.invlen_GR)),invlen_INT(std::move(other.invlen_INT))
+    invlen_GR(std::move(other.invlen_GR)),invlen_INT(std::move(other.invlen_INT)),
+    dNdE_CC(std::move(other.dNdE_CC)),  dNdE_NC(std::move(other.dNdE_NC))
     {}
     /// \brief Assignment operator
     InteractionState& operator=(const InteractionState& other){
@@ -318,6 +324,8 @@ protected:
       invlen_CC=other.invlen_CC;
       invlen_GR=other.invlen_GR;
       invlen_INT=other.invlen_INT;
+      dNdE_NC = other.dNdE_NC;
+      dNdE_CC = other.dNdE_CC;
       return(*this);
     }
     /// \brief Move assignment operator
@@ -326,6 +334,8 @@ protected:
       invlen_CC=std::move(other.invlen_CC);
       invlen_GR=std::move(other.invlen_GR);
       invlen_INT=std::move(other.invlen_INT);
+      dNdE_NC = std::move(other.dNdE_NC);
+      dNdE_CC = std::move(other.dNdE_CC);
       return(*this);
     }
     /// \brief Equality operator
@@ -333,6 +343,8 @@ protected:
       if (invlen_CC.size() != other.invlen_CC.size() or
           invlen_NC.size() != other.invlen_NC.size() or
           invlen_GR.size() != other.invlen_GR.size() or
+          dNdE_CC.size() != other.dNdE_CC.size() or
+          dNdE_NC.size() != other.dNdE_NC.size() or
           invlen_INT.size() != other.invlen_INT.size())
         return false;
       
@@ -341,11 +353,17 @@ protected:
       
       if ( not std::equal(invlen_NC.begin(),invlen_NC.end(),other.invlen_NC.begin()) )
         return false;
-      
+
       if ( not std::equal(invlen_GR.begin(),invlen_GR.end(),other.invlen_GR.begin()) )
         return false;
-      
+ 
       if ( not std::equal(invlen_INT.begin(),invlen_INT.end(),other.invlen_INT.begin()) )
+        return false;
+
+      if ( not std::equal(dNdE_NC.begin(),dNdE_NC.end(),other.dNdE_NC.begin()) )
+        return false;
+
+      if ( not std::equal(dNdE_CC.begin(),dNdE_CC.end(),other.dNdE_CC.begin()) )
         return false;
       // all is good - lets roll
       return true;
