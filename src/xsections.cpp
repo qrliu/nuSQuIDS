@@ -130,12 +130,6 @@ quested below "+std::to_string(Emin/GeV)+" GeV or above "+std::to_string(Emax/Ge
 }
 
 void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
-/*       std::vector<Target> targets_to_load;
-       if(use_isoscalar)
-        targets_to_load = {Isoscalar};
-       else
-        targets_to_load = {Proton, Neutron};
-*/
 
        std::string filename_p_dsde_CC = root+"p_dsde_CC.dat";
        std::string filename_p_dsde_NC = root+"p_dsde_NC.dat";
@@ -150,7 +144,7 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
        std::string filename_niso_dsde_NC = root+"niso_dsde_NC.dat";
        std::string filename_niso_sigma_CC = root+"niso_sigma_CC.dat";
        std::string filename_niso_sigma_NC = root+"niso_sigma_NC.dat";
-       
+
        if(
           fexists(filename_p_dsde_CC) and
           fexists(filename_p_dsde_NC) and
@@ -160,56 +154,36 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           fexists(filename_p_sigma_NC) and
           fexists(filename_n_sigma_CC) and
           fexists(filename_n_sigma_NC)
-         ) {
-            p_dsde_CC_raw_data = quickread(filename_p_dsde_CC);
-            p_dsde_NC_raw_data = quickread(filename_p_dsde_NC);
-            n_dsde_CC_raw_data = quickread(filename_n_dsde_CC);
-            n_dsde_NC_raw_data = quickread(filename_n_dsde_NC);
-            p_sigma_CC_raw_data = quickread(filename_p_sigma_CC);
-            p_sigma_NC_raw_data = quickread(filename_p_sigma_NC);
-            n_sigma_CC_raw_data = quickread(filename_n_sigma_CC);
-            n_sigma_NC_raw_data = quickread(filename_n_sigma_NC);
-           }
-        else if (
+         )
+       {
+          p_dsde_CC_raw_data = quickread(filename_p_dsde_CC);
+          p_dsde_NC_raw_data = quickread(filename_p_dsde_NC);
+          n_dsde_CC_raw_data = quickread(filename_n_dsde_CC);
+          n_dsde_NC_raw_data = quickread(filename_n_dsde_NC);
+          p_sigma_CC_raw_data = quickread(filename_p_sigma_CC);
+          p_sigma_NC_raw_data = quickread(filename_p_sigma_NC);
+          n_sigma_CC_raw_data = quickread(filename_n_sigma_CC);
+          n_sigma_NC_raw_data = quickread(filename_n_sigma_NC);
+          use_isoscalar = false;
+       }
+       else if (
                  fexists(filename_niso_dsde_CC) and
                  fexists(filename_niso_dsde_NC) and
                  fexists(filename_niso_sigma_CC) and
                  fexists(filename_niso_sigma_NC)
-                ) {
-                   niso_dsde_CC_raw_data = quickread(filename_niso_dsde_CC);
-                   niso_dsde_NC_raw_data = quickread(filename_niso_dsde_NC);
-                   niso_sigma_CC_raw_data = quickread(filename_niso_sigma_CC);
-                   niso_sigma_NC_raw_data = quickread(filename_niso_sigma_NC);
-                   use_isoscalar = true;
-                  }
-       else { throw std::runtime_error("nuSQUIDS::XSECTIONS::ERROR::Cross section files not found.");
-            }
-/*       if(use_isoscalar){
-             filename_dsde_CC = root+"dsde_CC.dat";
-             filename_dsde_NC = root+"dsde_NC.dat";
-             filename_sigma_CC = root+"sigma_CC.dat";
-             filename_sigma_NC = root+"sigma_NC.dat";
-       } else {
-             filename_dsde_CC_p = root+"dsde_p_CC.dat";
-             filename_dsde_CC_n = root+"dsde_n_CC.dat";
-
-       }
-*/
-
-/*       std::cout << filename_sigma_NC << std::endl;
-       // check if files exist for this energies and divisions
-       if(
-          fexists(filename_dsde_CC) and
-          fexists(filename_dsde_NC) and
-          fexists(filename_sigma_CC) and
-          fexists(filename_sigma_NC)
-          )
+                )
        {
-*/
-       if(
-          use_isoscalar
-         ) {
-         registered_targets_ = {Isoscalar};
+          niso_dsde_CC_raw_data = quickread(filename_niso_dsde_CC);
+          niso_dsde_NC_raw_data = quickread(filename_niso_dsde_NC);
+          niso_sigma_CC_raw_data = quickread(filename_niso_sigma_CC);
+          niso_sigma_NC_raw_data = quickread(filename_niso_sigma_NC);
+          use_isoscalar = true;
+       }
+       else {
+         throw std::runtime_error("nuSQUIDS::XSECTIONS::ERROR::Cross section files not found.");
+       }
+       if(use_isoscalar){
+          registered_targets_ = {Isoscalar};
 /*          // read data tables
           marray<double,2> niso_dsde_CC_raw_data = quickread(filename_dsde_CC);
           marray<double,2> dsde_NC_raw_data = quickread(filename_dsde_NC);
@@ -238,7 +212,7 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           s_NC_data.resize(std::vector<size_t>{1,2,3,data_e_size});
           dsde_CC_data.resize(std::vector<size_t>{1,2,3,data_e_size,data_e_size});
           dsde_NC_data.resize(std::vector<size_t>{1,2,3,data_e_size,data_e_size});
-//          for(Target target : targets_to_load){
+
           for(NeutrinoType neutype : {neutrino,antineutrino}){
             for(NeutrinoFlavor flavor : {electron,muon,tau}){
               for(unsigned int e1 = 0; e1 < data_e_size; e1++){
@@ -252,10 +226,8 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
                 }
               }
             }
-          
-  } else {
-//    throw std::runtime_error("nuSQUIDS::XSECTIONS::ERROR::Cross section files not found.");
-         registered_targets_ = {Proton, Neutron};
+      } else {
+          registered_targets_ = {Proton, Neutron};
           unsigned int data_e_size = 0;
           if( p_sigma_CC_raw_data.extent(0) == p_sigma_NC_raw_data.extent(0) and
               p_sigma_CC_raw_data.extent(0) == p_sigma_NC_raw_data.extent(0) and 
@@ -271,7 +243,7 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           logE_data_range.resize(data_e_size);
           for( int ie = 0; ie < data_e_size; ie ++)
             logE_data_range[ie] = log(p_sigma_CC_raw_data[ie][0]);
-          
+
           // TODO find out if it's okay to use only proton info
           Emin = p_sigma_CC_raw_data[0][0]*GeV;
           Emax = p_sigma_CC_raw_data[data_e_size-1][0]*GeV;
@@ -280,7 +252,7 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           // convert raw data tables into formatted marrays
           s_CC_data.resize(std::vector<size_t>{2,2,3,data_e_size});
           s_NC_data.resize(std::vector<size_t>{2,2,3,data_e_size});
-          // TODO figure out who to properly integrate neutron ifo
+
           dsde_CC_data.resize(std::vector<size_t>{2,2,3,data_e_size,data_e_size});
           dsde_NC_data.resize(std::vector<size_t>{2,2,3,data_e_size,data_e_size});
           for(Target target : {Proton, Neutron}){
@@ -307,15 +279,15 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
               }
             }
           }
-  }      
+  }
   // declare the object as initialized;
   is_init = true;
 }
-  
+
 NeutrinoDISCrossSectionsFromTables::NeutrinoDISCrossSectionsFromTables():
   NeutrinoDISCrossSectionsFromTables(XSECTION_LOCATION "csms.h5"){
 }
-    
+
 NeutrinoDISCrossSectionsFromTables::NeutrinoDISCrossSectionsFromTables(std::string path){
   bool is_isoscalar;
   //If a single file, read HDF5
