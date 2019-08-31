@@ -137,19 +137,19 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
         targets_to_load = {Proton, Neutron};
 */
 
-       std::string filename_p_dsde_CC = root+"";
-       std::string filename_p_dsde_NC = root+"";
-       std::string filename_n_dsde_CC = root+"";
-       std::string filename_n_dsde_NC = root+"";
-       std::string filename_p_sigma_CC = root+"nusigma_p_sigma_CC.dat";
-       std::string filename_p_sigma_NC = root+"nusigma_p_sigma_NC.dat";
-       std::string filename_n_sigma_CC = root+"nusigma_n_sigma_CC.dat";
-       std::string filename_n_sigma_NC = root+"nusigma_n_sigma_NC.dat";
+       std::string filename_p_dsde_CC = root+"p_dsde_CC.dat";
+       std::string filename_p_dsde_NC = root+"p_dsde_NC.dat";
+       std::string filename_n_dsde_CC = root+"n_dsde_CC.dat";
+       std::string filename_n_dsde_NC = root+"n_dsde_NC.dat";
+       std::string filename_p_sigma_CC = root+"p_sigma_CC.dat";
+       std::string filename_p_sigma_NC = root+"p_sigma_NC.dat";
+       std::string filename_n_sigma_CC = root+"n_sigma_CC.dat";
+       std::string filename_n_sigma_NC = root+"n_sigma_NC.dat";
 
-       std::string filename_niso_dsde_CC = root+"nusigma_niso_dsde_CC.dat";
-       std::string filename_niso_dsde_NC = root+"nusigma_niso_dsde_NC.dat";
-       std::string filename_niso_sigma_CC = root+"nusigma_niso_sigma_CC.dat";
-       std::string filename_niso_sigma_NC = root+"nusigma_niso_sigma_NC.dat";
+       std::string filename_niso_dsde_CC = root+"niso_dsde_CC.dat";
+       std::string filename_niso_dsde_NC = root+"niso_dsde_NC.dat";
+       std::string filename_niso_sigma_CC = root+"niso_sigma_CC.dat";
+       std::string filename_niso_sigma_NC = root+"niso_sigma_NC.dat";
        
        if(
           fexists(filename_p_dsde_CC) and
@@ -278,8 +278,8 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           div = data_e_size;
 
           // convert raw data tables into formatted marrays
-          s_CC_data.resize(std::vector<size_t>{2,3,data_e_size});
-          s_NC_data.resize(std::vector<size_t>{2,3,data_e_size});
+          s_CC_data.resize(std::vector<size_t>{2,2,3,data_e_size});
+          s_NC_data.resize(std::vector<size_t>{2,2,3,data_e_size});
           // TODO figure out who to properly integrate neutron ifo
           dsde_CC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
           dsde_NC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
