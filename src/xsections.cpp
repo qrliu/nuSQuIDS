@@ -317,6 +317,7 @@ NeutrinoDISCrossSectionsFromTables::NeutrinoDISCrossSectionsFromTables():
 }
     
 NeutrinoDISCrossSectionsFromTables::NeutrinoDISCrossSectionsFromTables(std::string path){
+  bool is_isoscalar;
   //If a single file, read HDF5
   if(fexists(path)){
     {
@@ -324,23 +325,43 @@ NeutrinoDISCrossSectionsFromTables::NeutrinoDISCrossSectionsFromTables(std::stri
       readH5Attribute(h5file, "Emin", Emin);
       readH5Attribute(h5file, "Emax", Emax);
       int rank = getArrayH5Rank(h5file, "s_CC");
-      if(rank == 3){
+      if(rank == 4){ // non-isoscalar
+        is_isoscalar = false;
         readArrayH5(h5file, "s_CC", s_CC_data);
         readArrayH5(h5file, "s_NC", s_NC_data);
         readArrayH5(h5file, "dsDE_CC", dsde_CC_data);
         readArrayH5(h5file, "dsDE_NC", dsde_NC_data);
       }
+      if(rank == 3){ // isoscalar
+
+
+
+        is_isoscalar = true;
+
+        marray<double,3> s_tmp_data;
+        readArrayH5(h5file, "s_CC", s_tmp_data);
+        writeIntoLargerMArray<3>(s_tmp_data,s_CC_data);
+        readArrayH5(h5file, "s_NC", s_tmp_data);
+        writeIntoLargerMArray<3>(s_tmp_data,s_NC_data);
+
+        marray<double,4> dsde_tmp_data;
+        readArrayH5(h5file, "dsDE_CC", dsde_CC_data);
+        writeIntoLargerMArray<4>(dsde_tmp_data,dsde_CC_data);
+        readArrayH5(h5file, "dsDE_NC", dsde_tmp_data);
+        writeIntoLargerMArray<4>(dsde_tmp_data,dsde_NC_data);
+      }
     }
     //TODO: make sanity checking more user friendly
-    assert(dsde_CC_data.extent(2)==dsde_CC_data.extent(3));
-    assert(dsde_NC_data.extent(2)==dsde_NC_data.extent(3));
-    assert(dsde_CC_data.extent(2)==dsde_NC_data.extent(2));
-    assert(dsde_CC_data.extent(0)==2);
-    assert(dsde_NC_data.extent(0)==2);
-    assert(dsde_CC_data.extent(1)==3);
-    assert(dsde_NC_data.extent(1)==3);
+    int off_set = (is_isoscalar) ? 0 : 1;
+    assert(dsde_CC_data.extent(2+off_set)==dsde_CC_data.extent(3+off_set));
+    assert(dsde_NC_data.extent(2+off_set)==dsde_NC_data.extent(3+off_set));
+    assert(dsde_CC_data.extent(2+off_set)==dsde_NC_data.extent(2+off_set));
+    assert(dsde_CC_data.extent(0+off_set)==2);
+    assert(dsde_NC_data.extent(0+off_set)==2);
+    assert(dsde_CC_data.extent(1+off_set)==3);
+    assert(dsde_NC_data.extent(1+off_set)==3);
     
-    div=dsde_CC_data.extent(2);
+    div=dsde_CC_data.extent(2+off_set);
     unsigned int data_e_size=div;
     auto raw_logE_data_range=logspace(Emin/GeV,Emax/GeV,div);
     logE_data_range.resize(data_e_size);

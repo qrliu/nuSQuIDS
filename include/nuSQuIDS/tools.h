@@ -279,6 +279,16 @@ void readH5Attribute(hid_t object, std::string name, T& dest){
 template<>
 void readH5Attribute<std::string>(hid_t object, std::string name, std::string& dest);
 
+template<unsigned int rank>
+void writeIntoLargerMArray(const marray<double,rank> & tmp, marray<double,rank+1> & target){
+  std::vector<unsigned int> dimensions {rank+1};
+  dimensions[0] = 1;
+  for(unsigned int i = 0; i < rank; i++)
+    dimensions[i+1] = tmp.extent(i);
+  target.resize(dimensions);
+  std::copy(tmp.begin(),tmp.end(),target.begin());
+}
+
 } // close namespace
 
 #endif

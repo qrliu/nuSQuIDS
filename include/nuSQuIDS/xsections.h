@@ -131,21 +131,17 @@ class NeutrinoDISCrossSectionsFromTables : public NeutrinoCrossSections {
       /// \brief The neutrino charged current total cross section
       ///
       ///Indices are target, neutrino/anti-neutrino, flavor, energy
-      /// FIXME
       marray<double,4> s_CC_data;
       /// \brief The neutrino neutral current total cross section
       ///
-      /// FIXME
       ///Indices are target, neutrino/anti-neutrino, flavor, energy
       marray<double,4> s_NC_data;
       /// \brief The neutrino charged current differential cross section.
       ///
-      /// FIXME
       ///Indices are target, neutrino/anti-neutrino, flavor, incident energy, out-going energy
       marray<double,5> target, dsde_CC_data;
       /// \brief The neutrino neutral current differential cross section.
       ///
-      /// FIXME
       ///Indices are target, neutrino/anti-neutrino, flavor, incident energy, out-going energy
       marray<double,5> dsde_NC_data;
       /// \brief Stores the array of the log energies of the data tables.
