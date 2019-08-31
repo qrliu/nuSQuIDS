@@ -234,10 +234,10 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           div = data_e_size;
 
           // convert raw data tables into formatted marrays
-          s_CC_data.resize(std::vector<size_t>{2,3,data_e_size});
-          s_NC_data.resize(std::vector<size_t>{2,3,data_e_size});
-          dsde_CC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
-          dsde_NC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
+          s_CC_data.resize(std::vector<size_t>{1,2,3,data_e_size});
+          s_NC_data.resize(std::vector<size_t>{1,2,3,data_e_size});
+          dsde_CC_data.resize(std::vector<size_t>{1,2,3,data_e_size,data_e_size});
+          dsde_NC_data.resize(std::vector<size_t>{1,2,3,data_e_size,data_e_size});
 //          for(Target target : targets_to_load){
           for(NeutrinoType neutype : {neutrino,antineutrino}){
             for(NeutrinoFlavor flavor : {electron,muon,tau}){
@@ -281,8 +281,8 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           s_CC_data.resize(std::vector<size_t>{2,2,3,data_e_size});
           s_NC_data.resize(std::vector<size_t>{2,2,3,data_e_size});
           // TODO figure out who to properly integrate neutron ifo
-          dsde_CC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
-          dsde_NC_data.resize(std::vector<size_t>{2,3,data_e_size,data_e_size});
+          dsde_CC_data.resize(std::vector<size_t>{2,2,3,data_e_size,data_e_size});
+          dsde_NC_data.resize(std::vector<size_t>{2,2,3,data_e_size,data_e_size});
           for(Target target : {Proton, Neutron}){
             for(NeutrinoType neutype : {neutrino,antineutrino}){
               for(NeutrinoFlavor flavor : {electron,muon,tau}){
@@ -323,10 +323,13 @@ NeutrinoDISCrossSectionsFromTables::NeutrinoDISCrossSectionsFromTables(std::stri
       H5File h5file(H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
       readH5Attribute(h5file, "Emin", Emin);
       readH5Attribute(h5file, "Emax", Emax);
-      readArrayH5(h5file, "s_CC", s_CC_data);
-      readArrayH5(h5file, "s_NC", s_NC_data);
-      readArrayH5(h5file, "dsDE_CC", dsde_CC_data);
-      readArrayH5(h5file, "dsDE_NC", dsde_NC_data);
+      int rank = getArrayH5Rank(h5file, "s_CC");
+      if(rank == 3){
+        readArrayH5(h5file, "s_CC", s_CC_data);
+        readArrayH5(h5file, "s_NC", s_NC_data);
+        readArrayH5(h5file, "dsDE_CC", dsde_CC_data);
+        readArrayH5(h5file, "dsDE_NC", dsde_NC_data);
+      }
     }
     //TODO: make sanity checking more user friendly
     assert(dsde_CC_data.extent(2)==dsde_CC_data.extent(3));

@@ -300,6 +300,17 @@ AkimaSpline::AkimaSpline(const std::vector<double>& x, const std::vector<double>
     }
 }
     
+int getArrayH5Rank(hid_t container, const std::string& name){
+    hid_t array_id=H5Dopen2(container, name.c_str(), H5P_DEFAULT);
+    if(array_id<0)
+        throw std::runtime_error("Failed to open dataset '"+name+"'");
+    hid_t dSpace = H5Dget_space(array_id);
+    int raw_dim = H5Sget_simple_extent_ndims(dSpace);
+    H5Sclose(dSpace);
+    H5Dclose(array_id);
+    return raw_dim;
+}
+
 template<>
 void addH5Attribute<std::string>(hid_t object, std::string name, const std::string& contents){
     hid_t strtype = H5Tcopy(H5T_C_S1);

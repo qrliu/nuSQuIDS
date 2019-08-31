@@ -214,6 +214,9 @@ void writeArrayH5(hid_t loc_id, std::string name, const marray<T,Rank,Alloc>& da
                                  +name+" error: "+std::to_string(err)+")");
 }
 
+int getArrayH5Rank(hid_t container, const std::string& name);
+
+
 template<typename T, unsigned int Rank, typename Alloc>
 void readArrayH5(hid_t container, const std::string& name, marray<T,Rank,Alloc>& data){
     hid_t array_id=H5Dopen2(container, name.c_str(), H5P_DEFAULT);
