@@ -32,8 +32,8 @@ class LinearCrossSections : public NeutrinoCrossSections {
   public :
     LinearCrossSections(double CC_to_NC):CC_to_NC(CC_to_NC){assert( CC_to_NC <= 1.0  && CC_to_NC >= 0.0 );}
     LinearCrossSections():LinearCrossSections(0.5){}
-    double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override;
-    double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current) const override;
+    double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override;
+    double SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const override;
   };
 } // close nusquids namespace
 

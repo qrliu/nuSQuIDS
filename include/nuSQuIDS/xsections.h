@@ -49,7 +49,7 @@ class NeutrinoCrossSections{
     /// \brief Interaction current type
     enum Current { CC, NC, GR };
     /// \brief Interaction current type
-    enum Target { Proton , Neutron , Isoscalar, Electron};
+    enum Target  { Proton , Neutron , Isoscalar, Electron };
     /// \brief Returns the total neutrino cross section
     /// \details Used to interpolate the total cross sections.
     virtual double TotalCrossSection(double Enu, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const = 0;
