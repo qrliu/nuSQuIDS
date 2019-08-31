@@ -327,16 +327,15 @@ NeutrinoDISCrossSectionsFromTables::NeutrinoDISCrossSectionsFromTables(std::stri
       int rank = getArrayH5Rank(h5file, "s_CC");
       if(rank == 4){ // non-isoscalar
         is_isoscalar = false;
+        registered_targets_ = {Proton, Neutron};
         readArrayH5(h5file, "s_CC", s_CC_data);
         readArrayH5(h5file, "s_NC", s_NC_data);
         readArrayH5(h5file, "dsDE_CC", dsde_CC_data);
         readArrayH5(h5file, "dsDE_NC", dsde_NC_data);
       }
       if(rank == 3){ // isoscalar
-
-
-
         is_isoscalar = true;
+         registered_targets_ = {Isoscalar};
 
         marray<double,3> s_tmp_data;
         readArrayH5(h5file, "s_CC", s_tmp_data);

@@ -244,7 +244,7 @@ void nuSQUIDS::InitializeInteractionVectors(){
   //Note that by rounding up the size of each array's final dimension we ensure
   //that if the beginning of the array is aligned, each segment starting with an
   //entry whose final index is zero will be as well.
-  
+
   // initialize cross section and interaction arrays
   size_t rounded_ne=round_up_to_aligned(ne);
   int_struct->dNdE_NC.resize(std::vector<size_t>{ntargets,nrhos,numneu,ne,rounded_ne});
@@ -834,7 +834,7 @@ void nuSQUIDS::InitializeInteractions(){
     std::cerr << ex.what() << std::endl;
     throw std::runtime_error("nuSQUIDS::init : Failed while trying initialize TauDecaySpectra object [TauDecaySpectra::Init]");
   }
-  
+
   // if we don't already have cached data, create it
   if ( !int_struct ) {
     int_struct.reset(new InteractionStructure);
@@ -842,8 +842,9 @@ void nuSQUIDS::InitializeInteractions(){
     if ( ncs == nullptr) {
       ncs = std::make_shared<NeutrinoDISCrossSectionsFromTables>();
     } // else we assume the user has already inintialized the object if not throw error.
-    
-    
+
+    ntargets = ncs->ListAvailableTargets().size();
+
     // initialize cross section and interaction arrays
     try {
       InitializeInteractionVectors();
@@ -861,7 +862,7 @@ void nuSQUIDS::InitializeInteractions(){
       throw std::runtime_error("nuSQUIDS::init : Failed while trying to fill in interaction vectors [InitializeInteractions]");
     }
   }
-  
+
   if(iinteraction){
     nc_factors.resize(std::vector<size_t>{nrhos,3,ne});
     if(tauregeneration){
@@ -871,15 +872,14 @@ void nuSQUIDS::InitializeInteractions(){
     if(iglashow)
       gr_factors.resize(std::vector<size_t>{ne});
   }
-  
+
   interactions_initialized=true;
 }
-  
+
 void nuSQUIDS::GetCrossSections(){
     // available targets
     std::vector<NeutrinoCrossSections::Target> available_targets = ncs->ListAvailableTargets();
     std::map<unsigned int, NeutrinoCrossSections::Target> target_xs_dict;
-    ntargets = available_targets.size();
     if(ntargets == 1) // assume its iso-scalar
       target_xs_dict = (std::map<unsigned int,NeutrinoCrossSections::Target>){{0,NeutrinoCrossSections::Isoscalar}};
     else // assume proton and neutron are provided
