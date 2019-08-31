@@ -247,12 +247,12 @@ void nuSQUIDS::InitializeInteractionVectors(){
   
   // initialize cross section and interaction arrays
   size_t rounded_ne=round_up_to_aligned(ne);
-  int_struct->dNdE_NC.resize(std::vector<size_t>{nrhos,numneu,ne,rounded_ne});
-  int_struct->dNdE_CC.resize(std::vector<size_t>{nrhos,numneu,ne,rounded_ne});
+  int_struct->dNdE_NC.resize(std::vector<size_t>{ntargets,nrhos,numneu,ne,rounded_ne});
+  int_struct->dNdE_CC.resize(std::vector<size_t>{ntargets,nrhos,numneu,ne,rounded_ne});
   int_struct->dNdE_GR.resize(std::vector<size_t>{ne,rounded_ne});
   // initialize cross section arrays
-  int_struct->sigma_CC.resize(std::vector<size_t>{nrhos,numneu,rounded_ne});
-  int_struct->sigma_NC.resize(std::vector<size_t>{nrhos,numneu,rounded_ne});
+  int_struct->sigma_CC.resize(std::vector<size_t>{ntargets,nrhos,numneu,rounded_ne});
+  int_struct->sigma_NC.resize(std::vector<size_t>{ntargets,nrhos,numneu,rounded_ne});
   int_struct->sigma_GR.resize(std::vector<size_t>{rounded_ne});
   // initialize the tau decay and interaction array
   int_struct->dNdE_tau_all.resize(std::vector<size_t>{nrhos,ne,rounded_ne});
