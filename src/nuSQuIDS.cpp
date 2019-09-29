@@ -516,7 +516,7 @@ void nuSQUIDS::UpdateInteractions(){
             int_state.invlen_INT[rho][flv][e1] = int_state.invlen_NC[rho][flv][e1] + int_state.invlen_CC[rho][flv][e1];
             for(unsigned int e2 = 0; e2 < ne; e2++){
               if(ntargets == 1){ // iso-scalar case
-                int_state.dNdE_CC[rho][flv][e1][e2] = int_struct->dNdE_NC[0][rho][flv][e1][e2];
+                int_state.dNdE_CC[rho][flv][e1][e2] = int_struct->dNdE_CC[0][rho][flv][e1][e2];
                 int_state.dNdE_NC[rho][flv][e1][e2] = int_struct->dNdE_NC[0][rho][flv][e1][e2];
               } else { // proton and neutron separate cross sections are available
                 int_state.dNdE_CC[rho][flv][e1][e2] = proton_fraction*int_struct->dNdE_CC[0][rho][flv][e1][e2] + (1.-proton_fraction)*int_struct->dNdE_CC[1][rho][flv][e1][e2];
@@ -569,28 +569,6 @@ void nuSQUIDS::UpdateInteractions(){
     memset(interaction_cache_store.get(),0,interaction_cache_store_size*sizeof(double));
 
     // NC interactions
-    for(unsigned int targets= 0; targets< ntargets; ntargets++){
-      for(unsigned int rho = 0; rho < nrhos; rho++){
-        //for each flavor
-        for(unsigned int alpha_active : {0,1,2}){
-          //accumulate the contribution of each energy e2 to each lower energy
-          squids::SU_vector& projector=evol_b1_proj[rho][alpha_active][0];
-          double* factors=&flavor_factors[rho][alpha_active][0];
-          assert(((intptr_t)factors)%(preferred_alignment*sizeof(double))==0);
-          SQUIDS_POINTER_IS_ALIGNED(factors,preferred_alignment*sizeof(double));
-          for(unsigned int e2=1; e2<ne; e2++){
-            //the flux of the current flavor at e2
-            double flux_a_e2=projector*estate[e2].rho[rho];
-            //premultiply factors which do not depend on the lower energy e1
-            flux_a_e2*=int_state.invlen_NC[rho][alpha_active][e2]*delE[e2-1];
-            double* dNdE_ptr=&int_state.dNdE_NC[rho][alpha_active][e2][0];
-            SQUIDS_POINTER_IS_ALIGNED(dNdE_ptr,preferred_alignment*sizeof(double));
-            for(unsigned int e1=0; e1<e2; e1++, dNdE_ptr++)
-              factors[e1]+=flux_a_e2*(*dNdE_ptr);
-          }
-        }
-      }
-    }
 
     if(tauregeneration){
       assert(numneu >= 3);
