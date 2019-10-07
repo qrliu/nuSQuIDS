@@ -41,15 +41,11 @@ struct H5File{
 namespace nusquids{
 
 double NeutrinoDISCrossSectionsFromTables::LinInter(double x,double xM, double xP,double yM,double yP) const{
-  std::string num("1");
-  std::cout << num << std::endl;
   return yM + (yP-yM)*(x-xM)/(xP-xM);
 }
 
 double NeutrinoDISCrossSectionsFromTables::TotalCrossSection(double Enu, NeutrinoFlavor flavor,
                            NeutrinoType neutype, Current current, Target target) const{
-  std::string num("2");
-  std::cout << num << std::endl;
   // we assume that sterile neutrinos are truly sterile
   if (not (flavor == electron or flavor == muon or flavor == tau))
     return 0.0;
@@ -79,8 +75,6 @@ quested below "+std::to_string(Emin/GeV)+" GeV or above "+std::to_string(Emax/Ge
 }
 
 double NeutrinoDISCrossSectionsFromTables::SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const{
-  std::string num("3");
-  std::cout << num << std::endl;
   // we assume that sterile neutrinos are trully sterile
   if (not (flavor == electron or flavor == muon or flavor == tau))
     return 0.0;
@@ -153,7 +147,6 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
        std::string filename_dsde_NC = root+"dsde_NC.dat";
        std::string filename_sigma_CC = root+"sigma_CC.dat";
        std::string filename_sigma_NC = root+"sigma_NC.dat";
-       std::cout << filename_sigma_CC << std::endl;
 
        // Check if proton and neutron cross section files exist. If yes, use p/n by default
        if(
@@ -428,8 +421,6 @@ GlashowResonanceCrossSection::~GlashowResonanceCrossSection(){}
 double GlashowResonanceCrossSection::TotalCrossSection(double Enu, NeutrinoFlavor flavor,
  NeutrinoType neutype, Current current, Target target) const{
 
-  std::string num("8");
-  std::cout << num << std::endl;
   // only treat the glashow resonance
   if (not (flavor == electron and neutype == antineutrino and current == GR))
     return 0;
@@ -445,8 +436,6 @@ double GlashowResonanceCrossSection::TotalCrossSection(double Enu, NeutrinoFlavo
 }
   
 double GlashowResonanceCrossSection::SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const{
-  std::string num("9");
-  std::cout << num << std::endl;
   // only treat the glashow resonance
   if (target != Electron)
     return 0.;
