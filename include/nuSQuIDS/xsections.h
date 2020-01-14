@@ -122,10 +122,10 @@ class NeutrinoDISCrossSectionsFromTables : public NeutrinoCrossSections {
       marray<double,2> p_sigma_NC_raw_data;
       marray<double,2> n_sigma_CC_raw_data;
       marray<double,2> n_sigma_NC_raw_data;
-      marray<double,2> dsde_CC_raw_data;
-      marray<double,2> dsde_NC_raw_data;
-      marray<double,2> sigma_CC_raw_data;
-      marray<double,2> sigma_NC_raw_data;
+      marray<double,2> niso_dsde_CC_raw_data;
+      marray<double,2> niso_dsde_NC_raw_data;
+      marray<double,2> niso_sigma_CC_raw_data;
+      marray<double,2> niso_sigma_NC_raw_data;
 
       bool use_isoscalar = false;
       /// \brief The neutrino charged current total cross section
@@ -139,7 +139,7 @@ class NeutrinoDISCrossSectionsFromTables : public NeutrinoCrossSections {
       /// \brief The neutrino charged current differential cross section.
       ///
       ///Indices are target, neutrino/anti-neutrino, flavor, incident energy, out-going energy
-      marray<double,5> dsde_CC_data;
+      marray<double,5> target, dsde_CC_data;
       /// \brief The neutrino neutral current differential cross section.
       ///
       ///Indices are target, neutrino/anti-neutrino, flavor, incident energy, out-going energy
