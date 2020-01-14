@@ -41,15 +41,11 @@ struct H5File{
 namespace nusquids{
 
 double NeutrinoDISCrossSectionsFromTables::LinInter(double x,double xM, double xP,double yM,double yP) const{
-  std::string num("1");
-  std::cout << num << std::endl;
   return yM + (yP-yM)*(x-xM)/(xP-xM);
 }
 
 double NeutrinoDISCrossSectionsFromTables::TotalCrossSection(double Enu, NeutrinoFlavor flavor,
                            NeutrinoType neutype, Current current, Target target) const{
-  std::string num("2");
-  std::cout << num << std::endl;
   // we assume that sterile neutrinos are truly sterile
   if (not (flavor == electron or flavor == muon or flavor == tau))
     return 0.0;
@@ -79,8 +75,6 @@ quested below "+std::to_string(Emin/GeV)+" GeV or above "+std::to_string(Emax/Ge
 }
 
 double NeutrinoDISCrossSectionsFromTables::SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const{
-  std::string num("3");
-  std::cout << num << std::endl;
   // we assume that sterile neutrinos are trully sterile
   if (not (flavor == electron or flavor == muon or flavor == tau))
     return 0.0;
@@ -137,7 +131,6 @@ quested below "+std::to_string(Emin/GeV)+" GeV or above "+std::to_string(Emax/Ge
 
 void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
 
-
        // Define proton and neutron cross section filenames
        std::string filename_p_dsde_CC = root+"p_dsde_CC.dat";
        std::string filename_p_dsde_NC = root+"p_dsde_NC.dat";
@@ -153,7 +146,6 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
        std::string filename_dsde_NC = root+"dsde_NC.dat";
        std::string filename_sigma_CC = root+"sigma_CC.dat";
        std::string filename_sigma_NC = root+"sigma_NC.dat";
-       std::cout << filename_sigma_CC << std::endl;
 
        // Check if proton and neutron cross section files exist. If yes, use p/n by default
        if(
@@ -167,73 +159,74 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           fexists(filename_n_sigma_NC)
          )
        {
-          p_dsde_CC_raw_data = quickread(filename_p_dsde_CC);
-          p_dsde_NC_raw_data = quickread(filename_p_dsde_NC);
-          n_dsde_CC_raw_data = quickread(filename_n_dsde_CC);
-          n_dsde_NC_raw_data = quickread(filename_n_dsde_NC);
-          p_sigma_CC_raw_data = quickread(filename_p_sigma_CC);
-          p_sigma_NC_raw_data = quickread(filename_p_sigma_NC);
-          n_sigma_CC_raw_data = quickread(filename_n_sigma_CC);
-          n_sigma_NC_raw_data = quickread(filename_n_sigma_NC);
+          marray<double,2> p_dsde_CC_raw_data = quickread(filename_p_dsde_CC);
+          marray<double,2> p_dsde_NC_raw_data = quickread(filename_p_dsde_NC);
+          marray<double,2> n_dsde_CC_raw_data = quickread(filename_n_dsde_CC);
+          marray<double,2> n_dsde_NC_raw_data = quickread(filename_n_dsde_NC);
+          marray<double,2> p_sigma_CC_raw_data = quickread(filename_p_sigma_CC);
+          marray<double,2> p_sigma_NC_raw_data = quickread(filename_p_sigma_NC);
+          marray<double,2> n_sigma_CC_raw_data = quickread(filename_n_sigma_CC);
+          marray<double,2> n_sigma_NC_raw_data = quickread(filename_n_sigma_NC);
           use_isoscalar = false;
        }
 
        // check if isoscalar cross section files exist
        else if (
-                 fexists(filename_dsde_CC) and
-                 fexists(filename_dsde_NC) and
-                 fexists(filename_sigma_CC) and
-                 fexists(filename_sigma_NC)
+                 fexists(filename_niso_dsde_CC) and
+                 fexists(filename_niso_dsde_NC) and
+                 fexists(filename_niso_sigma_CC) and
+                 fexists(filename_niso_sigma_NC)
                 )
        {
-          //marray<double,2> dsde_CC_raw_data = quickread(filename_dsde_CC);
-          //marray<double,2> dsde_NC_raw_data = quickread(filename_dsde_NC);
-          //marray<double,2> sigma_CC_raw_data = quickread(filename_sigma_CC);
-          //marray<double,2> sigma_NC_raw_data = quickread(filename_sigma_NC);
-          dsde_CC_raw_data = quickread(filename_dsde_CC);
-          dsde_NC_raw_data = quickread(filename_dsde_NC);
-          sigma_CC_raw_data = quickread(filename_sigma_CC);
-          sigma_NC_raw_data = quickread(filename_sigma_NC);
+          marray<double,2> niso_dsde_CC_raw_data = quickread(filename_niso_dsde_CC);
+          marray<double,2> niso_dsde_NC_raw_data = quickread(filename_niso_dsde_NC);
+          marray<double,2> niso_sigma_CC_raw_data = quickread(filename_niso_sigma_CC);
+          marray<double,2> niso_sigma_NC_raw_data = quickread(filename_niso_sigma_NC);
           use_isoscalar = true;
        }
        else {
          throw std::runtime_error("nuSQUIDS::XSECTIONS::ERROR::Cross section files not found.");
        }
        if(use_isoscalar){
-          
           registered_targets_ = {Isoscalar};
+/*          // read data tables
+          marray<double,2> niso_dsde_CC_raw_data = quickread(filename_dsde_CC);
+          marray<double,2> dsde_NC_raw_data = quickread(filename_dsde_NC);
+          marray<double,2> sigma_CC_raw_data = quickread(filename_sigma_CC);
+          marray<double,2> sigma_NC_raw_data = quickread(filename_sigma_NC);
+*/
           // check table shapes and get the number of energy nodes
-          unsigned int data_e_size = 1;
-          if( sigma_CC_raw_data.extent(0) == sigma_NC_raw_data.extent(0) and
-              sigma_CC_raw_data.extent(1) == sigma_NC_raw_data.extent(1) )
-            data_e_size = sigma_CC_raw_data.extent(0);
+          unsigned int data_e_size = 0;
+          if( niso_sigma_CC_raw_data.extent(0) == niso_sigma_NC_raw_data.extent(0) and
+              niso_sigma_NC_raw_data.extent(1) == niso_sigma_NC_raw_data.extent(1) )
+            data_e_size = niso_sigma_CC_raw_data.extent(0);
           else
             throw std::runtime_error("nuSQUIDS::xsections::init: Data tables not the same size.");
 
           // getting the raw data energy node values
           logE_data_range.resize(data_e_size);
           for( int ie = 0; ie < data_e_size; ie ++)
-            logE_data_range[ie] = log(sigma_CC_raw_data[ie][0]);
+            logE_data_range[ie] = log(niso_sigma_CC_raw_data[ie][0]);
 
-          Emin = sigma_CC_raw_data[0][0]*GeV;
-          Emax = sigma_CC_raw_data[data_e_size-1][0]*GeV;
+          Emin = niso_sigma_CC_raw_data[0][0]*GeV;
+          Emax = niso_sigma_CC_raw_data[data_e_size-1][0]*GeV;
           div = data_e_size;
 
           // convert raw data tables into formatted marrays
-          s_CC_data.resize(std::vector<size_t>{3,2,3,data_e_size});
-          s_NC_data.resize(std::vector<size_t>{3,2,3,data_e_size});
-          dsde_CC_data.resize(std::vector<size_t>{3,2,3,data_e_size,data_e_size});
-          dsde_NC_data.resize(std::vector<size_t>{3,2,3,data_e_size,data_e_size});
-          
+          s_CC_data.resize(std::vector<size_t>{1,2,3,data_e_size});
+          s_NC_data.resize(std::vector<size_t>{1,2,3,data_e_size});
+          dsde_CC_data.resize(std::vector<size_t>{1,2,3,data_e_size,data_e_size});
+          dsde_NC_data.resize(std::vector<size_t>{1,2,3,data_e_size,data_e_size});
+
           for(NeutrinoType neutype : {neutrino,antineutrino}){
             for(NeutrinoFlavor flavor : {electron,muon,tau}){
               for(unsigned int e1 = 0; e1 < data_e_size; e1++){
                   // FIXME
-                s_CC_data[Isoscalar][neutype][flavor][e1] = sigma_CC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
-                s_NC_data[Isoscalar][neutype][flavor][e1] = sigma_NC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
+                s_CC_data[Isoscalar][neutype][flavor][e1] = niso_sigma_CC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
+                  s_NC_data[Isoscalar][neutype][flavor][e1] = niso_sigma_NC_raw_data[e1][1+2*((int)flavor)+(int)neutype];
                   for (unsigned int e2 = 0; e2 < data_e_size; e2++){
-                    dsde_CC_data[Isoscalar][neutype][flavor][e1][e2] = dsde_CC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
-                    dsde_NC_data[Isoscalar][neutype][flavor][e1][e2] = dsde_NC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+                    dsde_CC_data[Isoscalar][neutype][flavor][e1][e2] = niso_dsde_CC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
+                    dsde_NC_data[Isoscalar][neutype][flavor][e1][e2] = niso_dsde_NC_raw_data[e1*data_e_size+e2][2+2*(static_cast<int>(flavor))+static_cast<int>(neutype)];
                   }
                 }
               }
@@ -243,8 +236,8 @@ void NeutrinoDISCrossSectionsFromTables::ReadText(std::string root){
           unsigned int data_e_size = 0;
           if( p_sigma_CC_raw_data.extent(0) == p_sigma_NC_raw_data.extent(0) and
               p_sigma_CC_raw_data.extent(0) == p_sigma_NC_raw_data.extent(0) and 
-              n_sigma_CC_raw_data.extent(1) == n_sigma_NC_raw_data.extent(1) and
-              n_sigma_CC_raw_data.extent(1) == n_sigma_NC_raw_data.extent(1)
+              n_sigma_NC_raw_data.extent(1) == n_sigma_NC_raw_data.extent(1) and
+              n_sigma_NC_raw_data.extent(1) == n_sigma_NC_raw_data.extent(1)
             ) {
                 data_e_size = p_sigma_CC_raw_data.extent(0);
               }
@@ -301,8 +294,6 @@ NeutrinoDISCrossSectionsFromTables::NeutrinoDISCrossSectionsFromTables():
 }
 
 NeutrinoDISCrossSectionsFromTables::NeutrinoDISCrossSectionsFromTables(std::string path){
-  
-
   bool is_isoscalar;
   //If a single file, read HDF5
   if(fexists(path)){
@@ -427,9 +418,6 @@ GlashowResonanceCrossSection::~GlashowResonanceCrossSection(){}
   
 double GlashowResonanceCrossSection::TotalCrossSection(double Enu, NeutrinoFlavor flavor,
  NeutrinoType neutype, Current current, Target target) const{
-
-  std::string num("8");
-  std::cout << num << std::endl;
   // only treat the glashow resonance
   if (not (flavor == electron and neutype == antineutrino and current == GR))
     return 0;
@@ -445,8 +433,6 @@ double GlashowResonanceCrossSection::TotalCrossSection(double Enu, NeutrinoFlavo
 }
   
 double GlashowResonanceCrossSection::SingleDifferentialCrossSection(double E1, double E2, NeutrinoFlavor flavor, NeutrinoType neutype, Current current, Target target) const{
-  std::string num("9");
-  std::cout << num << std::endl;
   // only treat the glashow resonance
   if (target != Electron)
     return 0.;
