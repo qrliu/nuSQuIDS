@@ -297,7 +297,8 @@ BOOST_PYTHON_MODULE(nuSQUIDSpy)
     ;
 
     class_<Sun::Track, std::shared_ptr<Sun::Track> >("Track", init<double>())
-    .def(init<double,double>())
+    .def(init<std::string>())
+	.def(init<double,double>())
     .def("GetInitialX",&Sun::Track::GetInitialX)
     .def("GetFinalX",&Sun::Track::GetFinalX)
     .def("GetX",&Sun::Track::GetX)
@@ -315,7 +316,8 @@ BOOST_PYTHON_MODULE(nuSQUIDSpy)
     ;
 
     class_<SunASnu::Track, std::shared_ptr<SunASnu::Track> >("Track", init<double>())
-    .def(init<double,double>())
+    .def(init<std::string>())
+	.def(init<double,double>())
     .def("GetInitialX",&SunASnu::Track::GetInitialX)
     .def("GetFinalX",&SunASnu::Track::GetFinalX)
     .def("GetX",&SunASnu::Track::GetX)
